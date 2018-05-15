@@ -14,7 +14,7 @@ access_token = "NMY3F7NH72IG6SKUC2KRHSBAIDRXMGKM"
 
 client = Wit(access_token=access_token)
 locus = Locus(LOCATION_DATA_PATH)
-query = raw_input("\n\n> Hi! I'm Locus, your virtual assistant for all things location.\n> Ask me things like \" Where was I last night?\" or \" Where was I Febraury 2nd at 4:15pm?\"\n> ")
+query = raw_input("\n\n> Hi! I'm Locus, your virtual assistant for all things location.\n> Ask me things like \"Where was I last night?\" or \"Where was I Febraury 2nd at 4:15pm?\"\n> ")
 while query != "quit":
 	resp = client.message(query)
 

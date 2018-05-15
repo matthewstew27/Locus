@@ -2,6 +2,8 @@ import json
 import datetime
 import numpy as np
 from datetime import date, time
+from dateutil import parser
+import pytz
 from math import cos, asin, sqrt, pi
 from geopy.geocoders import Nominatim
 import googlemaps
@@ -138,21 +140,33 @@ class Locus:
 		return raw_result[0]["formatted_address"]
 		#return self.geolocator.reverse("{}, {}".format(lat,lon)) # goepy API, alternative to googlemaps
 
+	def coordsToAddressEntry(self, raw_entry):
+		return self.coordsToAddress(raw_entry["latitudeE7"],raw_entry["longitudeE7"])
+
 	# This is where we process the messages retrieved by wit.ai
 	# TODO: add ability to respond to queries beyong asking about "last night"
 	def processIntent(self, intent, msg):
-		result = ""
+		result = "Nothing to see here"
 		if intent == None:
 			result = "I'm sorry. I couldn't understand your question. Please ask again."
 		else:
 			val = intent[0]["value"]
 			if val == "aboutLastNight":
-				raw_entry = self.aboutLastNight()
-				result = "\n\nAccording to Locus, you spent time at {} last night.\n".format(self.coordsToAddress(raw_entry["latitudeE7"],raw_entry["longitudeE7"]))
+				result = self.aboutLastNight()
+			elif val == "getLocation":
+				result = self.getLocationGeneric(msg)
+				#result = self.getLocGeneric()
 		return "{}".format(result)
+
+	def getLocationGeneric(self,msg):
+		raw_datetime = msg["entities"]["datetime"][0]["value"]
+		formatted_date = parser.parse(raw_datetime).replace(tzinfo=None)
+		raw_entry = self.getLocByTime(formatted_date)
+		return "\n\nAccording to Locus, on {} you were at {}.\n".format(formatted_date, self.coordsToAddressEntry(raw_entry))
 
 	def aboutLastNight(self):
 		now = datetime.datetime.now()
 		# treat lastNight as the day before today (i.e. 'now') at 8pm (20)
 		lastNight = datetime.datetime(now.year, now.month, now.day-1, 20, 0, 0, 0)
-		return self.getLocByTime(lastNight)
+		raw_entry = self.getLocByTime(lastNight)
+		return "\n\nAccording to Locus, you spent time at {} last night.\n".format(self.coordsToAddressEntry(raw_entry))
