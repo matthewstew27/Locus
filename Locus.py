@@ -155,14 +155,16 @@ class Locus:
 				result = self.aboutLastNight()
 			elif val == "getLocation":
 				result = self.getLocationGeneric(msg)
-				#result = self.getLocGeneric()
 		return "{}".format(result)
 
 	def getLocationGeneric(self,msg):
 		raw_datetime = msg["entities"]["datetime"][0]["value"]
 		formatted_date = parser.parse(raw_datetime).replace(tzinfo=None)
-		raw_entry = self.getLocByTime(formatted_date)
-		return "\n\nAccording to Locus, on {} you were at {}.\n".format(formatted_date, self.coordsToAddressEntry(raw_entry))
+		closest_date = self.getClosestTimestamp(formatted_date)
+		if closest_date != formatted_date:
+			print("\nThe nearest timestamp we have location data for to {} is {}.".format(formatted_date,closest_date))
+		raw_entry = self.getLocByTime(closest_date)
+		return "\n\nAccording to Locus, on {} you were at {}.\n".format(closest_date, self.coordsToAddressEntry(raw_entry))
 
 	def aboutLastNight(self):
 		now = datetime.datetime.now()
