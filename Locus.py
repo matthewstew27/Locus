@@ -44,17 +44,14 @@ class Locus:
 			cleaned_location["latitudeE7"] = location["latitudeE7"]/10000000.0
 			cleaned_location["longitudeE7"] = location["longitudeE7"]/10000000.0
 			cleaned_location["datetime"] = formatted_date
+			# Don't add data point if moving
 			if "velocity" not in cleaned_location or cleaned_location["velocity"] == 0:
 				cleaned_location["velocity"] = -1
 				cleaned_location["moving"] = False
-			else:
-				cleaned_location["moving"] = True
+				location = str(cleaned_location["latitudeE7"])+":"+str(cleaned_location["longitudeE7"])
+				self.time_indexed_map[formatted_date] = cleaned_location
+				self.location_indexed_map[location] = formatted_date
 
-			#curr = cleaned_location
-			#if prev:
-			#	total += self.distance2(prev,curr)
-			#prev = curr
-			self.time_indexed_map[formatted_date] = cleaned_location
 		print("Locus found {} data points".format(len(self.time_indexed_map.keys())))
 
 	def getTimeIndexedEntry(self, key):
@@ -68,6 +65,12 @@ class Locus:
 
 	def getDatetime(self,entry):
 		return entry["datetime"]
+
+	def getLatLong(self, loc_str):
+		latLong = loc_str.split(":")
+		lat = float(latLong[0])
+		lon = float(latLong[1])
+		return (lat,lon)
 
 	# Very naive and not really useful rn
 	def calculateTrips(self):
@@ -128,6 +131,43 @@ class Locus:
 		nearest_timestamp = self.getClosestTimestamp(timestamp)
 		return self.time_indexed_map[nearest_timestamp]
 
+	# given (longitude, lattitude) tuple returns most recent visit timestamp
+	def getNearestLoc(self, loc):
+		lat, lon = loc[0],loc[1]
+		target_address_readable = self.coordsToAddress(lat,lon)
+		print(target_address_readable)
+		timestamps = self.getTimeStamps()
+		for ts in timestamps:
+			entry = self.time_indexed_map[ts]
+			curr_lat, curr_lon = entry["latitudeE7"],entry["longitudeE7"]
+			# if distance is less than 0.03 KM, checks if 
+			# human readable address is same as that being searched for
+			if self.distance(loc[0],loc[1],curr_lat,curr_lon) < 0.03:
+				curr_address_readable = self.coordsToAddress(curr_lat,curr_lon)
+				if curr_address_readable == target_address_readable:
+					print(" ============> ",curr_address_readable)
+					return ts
+				else:
+					print("Close, but not close enough")
+		return None
+
+	def getTimeByLoc(self,lat,lon):
+		return self.getNearestLoc((lat,lon)) 
+
+	def getLastVisit(self,msg):
+		print(msg)
+		address = msg["entities"]["location"][0]["value"]
+		print("Parsed the following location: {}".format(address))
+		geocode_result = self.gmaps.geocode(address)[0]["geometry"]["location"]
+		lat,lon = geocode_result["lat"],geocode_result["lng"]
+		print("Reverse Geocoding identified the following lat and long: {}, {}".format(lat,lon))
+		result = self.getTimeByLoc(lat,lon)
+		if result:
+			response = "\n\nAccording to Locus, you last visited {} on {}.\n".format(address, result)
+		else:
+			response = "\n\nLocus could not locate any past trips to {}.\n".format(address)
+		return response
+
 	def toTimestamp(self,month,day,year,hour=12,minute=00):
 		d = date(year, month, day)
 		t = time(hour,minute)
@@ -144,7 +184,6 @@ class Locus:
 		return self.coordsToAddress(raw_entry["latitudeE7"],raw_entry["longitudeE7"])
 
 	# This is where we process the messages retrieved by wit.ai
-	# TODO: add ability to respond to queries beyong asking about "last night"
 	def processIntent(self, intent, msg):
 		result = "Nothing to see here"
 		if intent == None:
@@ -155,6 +194,8 @@ class Locus:
 				result = self.aboutLastNight()
 			elif val == "getLocation":
 				result = self.getLocationGeneric(msg)
+			elif val == "getLastVisit":
+				result = self.getLastVisit(msg)
 		return "{}".format(result)
 
 	def getLocationGeneric(self,msg):
