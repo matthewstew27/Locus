@@ -8,10 +8,13 @@ from math import cos, asin, sqrt, pi
 from geopy.geocoders import Nominatim
 import googlemaps
 from scipy.cluster.vq import vq, kmeans, whiten
+import pickle
+import os.path
 
 class Locus:
 	def __init__(self, path):
 		print("Locus is ingesting your location data...")
+
 		self.KEY_POINTS = {
 			"TDX" : [37.420847,-122.170179],
 			"COHO" : [37.424079,-122.170898],
@@ -19,11 +22,14 @@ class Locus:
 			"HOTPOT" :[37.761343,-122.430312],
 			"NYC" : [40.686741, -73.993172]
 			}
+
 		self.geolocator = Nominatim() # not currently being used, but alternate to googlemaps API
 		self.gmaps = googlemaps.Client(key='AIzaSyDhZMGliOJheydVX4jAZ2sBOfH3912hzFU')
+
 		self.time_indexed_map = dict()
 		self.location_indexed_map = dict() # haven't started work on this yet. Indexing by location will presumably be useful/necessary
-
+		self.readable_indexed_map = dict()
+		
 		with open(path,"r") as f:
 			self.data = json.load(f)["locations"]
 
@@ -36,7 +42,28 @@ class Locus:
 	def parse_datetime(self,timestampMs):
 		return datetime.datetime.fromtimestamp(int(timestampMs)/1000.0)
 
+	def coordsToAddress(self, lat, lon):
+		raw_result = self.gmaps.reverse_geocode((lat, lon)) #Google API
+		# will likely fail when the result is empty or is missing this field
+		# TODO: figure out a better way of retrieving formatted address, as google gives back multiple in ranked order. This just grabs the first.
+		return raw_result[0]["formatted_address"]
+		#return self.geolocator.reverse("{}, {}".format(lat,lon)) # goepy API, alternative to googlemaps
+
 	def process_json(self):
+		if self.loadPickledFiles('data/time_indexed_map.pickle'):
+			print("Loading pickled files ...")
+			with open('data/time_indexed_map.pickle', 'rb') as handle:
+				self.time_indexed_map = pickle.load(handle)
+			with open('data/location_indexed_map.pickle', 'rb') as handle2:
+				self.location_indexed_map = pickle.load(handle2)
+			with open('data/readable_indexed_map.pickle', 'rb') as handle3:
+				self.readable_indexed_map = pickle.load(handle3)
+
+			print(self.readable_indexed_map)
+
+			return
+
+		# No pickled maps exist so create them
 		prev = None
 		curr = None
 		total = 0.0
@@ -46,6 +73,8 @@ class Locus:
 			cleaned_location["latitudeE7"] = location["latitudeE7"]/10000000.0
 			cleaned_location["longitudeE7"] = location["longitudeE7"]/10000000.0
 			cleaned_location["datetime"] = formatted_date
+			human_readable_address = self.coordsToAddress(cleaned_location["latitudeE7"],cleaned_location["longitudeE7"])
+			cleaned_location["readable_address"] = human_readable_address
 			# Don't add data point if moving
 			if "velocity" not in cleaned_location or cleaned_location["velocity"] == 0:
 				cleaned_location["velocity"] = -1
@@ -53,9 +82,22 @@ class Locus:
 				location = str(cleaned_location["latitudeE7"])+":"+str(cleaned_location["longitudeE7"])
 				self.time_indexed_map[formatted_date] = cleaned_location
 				self.location_indexed_map[location] = formatted_date
-		print(min(self.time_indexed_map.keys()),max(self.time_indexed_map.keys()))
-
+				self.readable_indexed_map[location] = human_readable_address
+		
+		# Save pickled files
+		with open('data/time_indexed_map.pickle', 'wb') as handle:
+			pickle.dump(self.time_indexed_map, handle)
+		with open('data/location_indexed_map.pickle', 'wb') as handle2:
+			pickle.dump(self.location_indexed_map, handle2)
+		with open('data/readable_indexed_map.pickle', 'wb') as handle3:
+			pickle.dump(self.readable_indexed_map, handle3)
+		
 		print("Locus found {} data points".format(len(self.time_indexed_map.keys())))
+
+	def loadPickledFiles(self,filename):
+		if os.path.isfile(filename):
+			print("True")
+			return True
 
 	def getTimeIndexedEntry(self, key):
 		return self.time_indexed_map[key]
@@ -118,7 +160,6 @@ class Locus:
 				already_at_location = True
 			elif already_at_location and d > 0.03:
 				already_at_location = False
-		#print("Found {} distinct trips to {}".format(num_visits,(lat,lon)))
 		return num_visits
 
 	def getNumVisits(self,msg):
@@ -204,13 +245,6 @@ class Locus:
 		d = date(year, month, day)
 		t = time(hour,minute)
 		return datetime.datetime.combine(d, t)
-
-	def coordsToAddress(self, lat, lon):
-		raw_result = self.gmaps.reverse_geocode((lat, lon)) #Google API
-		# will likely fail when the result is empty or is missing this field
-		# TODO: figure out a better way of retrieving formatted address, as google gives back multiple in ranked order. This just grabs the first.
-		return raw_result[0]["formatted_address"]
-		#return self.geolocator.reverse("{}, {}".format(lat,lon)) # goepy API, alternative to googlemaps
 
 	def coordsToAddressEntry(self, raw_entry):
 		return self.coordsToAddress(raw_entry["latitudeE7"],raw_entry["longitudeE7"])
