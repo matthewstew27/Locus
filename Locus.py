@@ -261,7 +261,6 @@ class Locus:
 			return self.aggergateTripsByLocation(loc)
 
 	def getLastVisit(self,msg):
-		print(msg)
 		address = msg["entities"]["location"][0]["value"]
 		print("Parsed the following location: {}".format(address))
 		geocode_result = self.gmaps.geocode(address)[0]["geometry"]["location"]
@@ -297,6 +296,8 @@ class Locus:
 				result = self.getLastVisit(msg)
 			elif val == "getNumVisits":
 				result = self.getNumVisits(msg)
+			elif val == "getTimeSpent":
+				result = self.getTimeSpent(msg)
 		return "{}".format(result)
 
 	def getLocationGeneric(self,msg):
@@ -323,4 +324,10 @@ class Locus:
 			i += 1
 			if i == num:
 				break
+
+	def getTimeSpent(self, msg):
+		loc = msg["entities"]["location"][0]["value"]
+		print(loc)
+		timespent = self.aggeregateTripTime(loc)
+		return "\n\nAccording to Locus, you've spent {} at {}.\n".format(timespent, loc)
 
