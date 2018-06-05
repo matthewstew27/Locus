@@ -7,6 +7,7 @@ import pytz
 from math import cos, asin, sqrt, pi
 from geopy.geocoders import Nominatim
 import googlemaps
+from scipy.cluster.vq import vq, kmeans, whiten
 
 class Locus:
 	def __init__(self, path):
@@ -29,6 +30,7 @@ class Locus:
 		self.process_json()
 		self.trips = self.calculateTrips()
 		print("Locus clustered your movements into {} distinct visits".format(len(self.trips)))
+		print("with {} distinct pairs".format(len(set(self.location_indexed_map.keys()))))
 
 
 	def parse_datetime(self,timestampMs):
@@ -51,6 +53,7 @@ class Locus:
 				location = str(cleaned_location["latitudeE7"])+":"+str(cleaned_location["longitudeE7"])
 				self.time_indexed_map[formatted_date] = cleaned_location
 				self.location_indexed_map[location] = formatted_date
+		print(min(self.time_indexed_map.keys()),max(self.time_indexed_map.keys()))
 
 		print("Locus found {} data points".format(len(self.time_indexed_map.keys())))
 
@@ -98,6 +101,35 @@ class Locus:
 				prev_lat,prev_lon = self.getLatLon(curr_loc)
 		return result
 
+
+	def cluster():
+		pass
+
+	def getNumDistinctVisits(self, lat,lon):
+		num_visits = 0
+		timestamps = self.getTimeStamps()
+		already_at_location = False
+		for ts in timestamps:
+			curr_entry = self.getLocByTime(ts)
+			curr_lat,curr_lon = curr_entry["latitudeE7"],curr_entry["longitudeE7"]
+			d = self.distance(lat,lon,curr_lat,curr_lon)
+			if not already_at_location and d <= 0.03:
+				num_visits += 1
+				already_at_location = True
+			elif already_at_location and d > 0.03:
+				already_at_location = False
+		#print("Found {} distinct trips to {}".format(num_visits,(lat,lon)))
+		return num_visits
+
+	def getNumVisits(self,msg):
+		address = msg["entities"]["location"][0]["value"]
+		print("Parsed the following location: {}".format(address))
+		geocode_result = self.gmaps.geocode(address)[0]["geometry"]["location"]
+		lat,lon = geocode_result["lat"],geocode_result["lng"]
+		print("Reverse Geocoding identified the following lat and long: {}, {}".format(lat,lon))
+		result = self.getNumDistinctVisits(lat,lon)
+		response = "\n\nAccording to Locus, you've visited {} {} times.\n".format(address, result)
+		return response
 
 	def distance(self,lat1, lon1, lat2, lon2):
 		p = pi/180.0
@@ -196,6 +228,8 @@ class Locus:
 				result = self.getLocationGeneric(msg)
 			elif val == "getLastVisit":
 				result = self.getLastVisit(msg)
+			elif val == "getNumVisits":
+				result = self.getNumVisits(msg)
 		return "{}".format(result)
 
 	def getLocationGeneric(self,msg):

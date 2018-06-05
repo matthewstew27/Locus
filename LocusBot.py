@@ -15,10 +15,12 @@ access_token = "NMY3F7NH72IG6SKUC2KRHSBAIDRXMGKM"
 
 client = Wit(access_token=access_token)
 locus = Locus(LOCATION_DATA_PATH)
-query = raw_input("\n\n> Hi! I'm Locus, your virtual assistant for all things location.\n> Ask me things like \"Where was I last night?\", \"Where was I Febraury 2nd at 4:15pm?\", or \"When was the last time I went to SFO?\"\n> ")
+query = raw_input("\n\n> Hi! I'm Locus, your virtual assistant for all things location.\n> Ask me things like \"Where was I last night?\", \"Where was I Febraury 2nd at 4:15pm?\", or \"When was the last time I went to SFO?i\"\n> ")
 while query != "quit":	
 	resp = client.message(query)
+	print(resp)
 	if 'intent' not in resp['entities']:
+		#locus.getNumDistinctVisits(37.4300,-122.1733) #37.4300 N, 122.1733 W
 		print ("\n\nLocus could not locate intent. Please change your wording.")
 	else:
 		intent = resp['entities']['intent']
