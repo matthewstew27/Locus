@@ -29,12 +29,13 @@ class Locus:
 		self.time_indexed_map = dict()
 		self.location_indexed_map = dict() # haven't started work on this yet. Indexing by location will presumably be useful/necessary
 		self.readable_indexed_map = dict()
-		
+		self.trips = dict()
+
 		with open(path,"r") as f:
 			self.data = json.load(f)["locations"]
 
 		self.process_json()
-		self.trips = self.calculateTrips()
+		self.calculateTrips()
 		print("Locus clustered your movements into {} distinct visits".format(len(self.trips)))
 		print("with {} distinct pairs".format(len(set(self.location_indexed_map.keys()))))
 
@@ -58,9 +59,6 @@ class Locus:
 				self.location_indexed_map = pickle.load(handle2)
 			with open('data/readable_indexed_map.pickle', 'rb') as handle3:
 				self.readable_indexed_map = pickle.load(handle3)
-
-			print(self.readable_indexed_map)
-
 			return
 
 		# No pickled maps exist so create them
@@ -117,35 +115,33 @@ class Locus:
 		lon = float(latLong[1])
 		return (lat,lon)
 
-	# Very naive and not really useful rn
+	def getAddressByTime(self,timestamp):
+		entry = self.time_indexed_map[timestamp]
+		address = entry["readable_address"]
+		return address
+
 	def calculateTrips(self):
-		# should return a series of (start,end,location,duration) tuples
 		keys = self.getTimeStamps()
 
 		if len(keys) == 0:
-			return []
+			return
 
-		result = []
-
-		prev_loc = self.getTimeIndexedEntry(keys[0])
-		prev_start_time = self.getDatetime(prev_loc)
-		prev_lat,prev_lon = self.getLatLon(prev_loc)
+		initial_time = keys[0]
+		prev_addr = self.getAddressByTime(initial_time)
+		self.trips[initial_time] = prev_addr
 		for timestamp in keys:
-			curr_loc = self.getTimeIndexedEntry(timestamp)
-			velocity = self.getVelocity(curr_loc)
-			delta = self.distance2(prev_loc,curr_loc)
-			if delta >= 15.0:
-				end = self.getDatetime(curr_loc)
-				trip_to_enter = (prev_start_time, end, (prev_lat,prev_lon), end-prev_start_time)
-				result += trip_to_enter
-				prev_loc = curr_loc
-				prev_start_time = end
-				prev_lat,prev_lon = self.getLatLon(curr_loc)
-		return result
+			curr_addr = self.getAddressByTime(timestamp)
+			if curr_addr == prev_addr:
+				continue
+			prev_addr = curr_addr
+			self.trips[timestamp] = prev_addr
+
+		#for key in sorted(self.trips.keys()):
+		#	print("{} =========>  {}".format(key,self.trips[key]))
 
 
 	def cluster():
-		pass
+		pass		
 
 	def getNumDistinctVisits(self, lat,lon):
 		num_visits = 0
