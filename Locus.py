@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 import datetime
 import numpy as np
 from datetime import date, time
@@ -7,7 +8,6 @@ import pytz
 from math import cos, asin, sqrt, pi
 from geopy.geocoders import Nominatim
 import googlemaps
-from scipy.cluster.vq import vq, kmeans, whiten
 import pickle
 import os.path
 
@@ -30,12 +30,15 @@ class Locus:
 		self.location_indexed_map = dict() # haven't started work on this yet. Indexing by location will presumably be useful/necessary
 		self.readable_indexed_map = dict()
 		self.trips = dict()
+		self.tripsByLocation = defaultdict(lambda: list())
+		self.aggergatedTripsByLocation = defaultdict(lambda: list())
 
 		with open(path,"r") as f:
 			self.data = json.load(f)["locations"]
 
 		self.process_json()
 		self.calculateTrips()
+		self.getTopMostVisited(5)
 		print("Locus clustered your movements into {} distinct visits".format(len(self.trips)))
 		print("with {} distinct pairs".format(len(set(self.location_indexed_map.keys()))))
 
@@ -96,6 +99,7 @@ class Locus:
 		if os.path.isfile(filename):
 			print("True")
 			return True
+		return False
 
 	def getTimeIndexedEntry(self, key):
 		return self.time_indexed_map[key]
@@ -129,42 +133,57 @@ class Locus:
 		initial_time = keys[0]
 		prev_addr = self.getAddressByTime(initial_time)
 		self.trips[initial_time] = prev_addr
+		start_time = initial_time
 		for timestamp in keys:
 			curr_addr = self.getAddressByTime(timestamp)
 			if curr_addr == prev_addr:
 				continue
+			self.tripsByLocation[prev_addr].append((start_time, timestamp))
+			start_time = timestamp
 			prev_addr = curr_addr
 			self.trips[timestamp] = prev_addr
 
-		#for key in sorted(self.trips.keys()):
-		#	print("{} =========>  {}".format(key,self.trips[key]))
+		# for key in sorted(self.trips.keys()):
+		# 	print("{} =========>  {}".format(key,self.trips[key]))
+		# for key in sorted(self.tripsByLocation.keys()):
+		# 	print("{} =========>  {}".format(key, self.tripsByLocation[key]))
+	
 
+	# def getNumDistinctVisits(self, lat,lon):
+	# 	num_visits = 0
+	# 	timestamps = self.getTimeStamps()
+	# 	already_at_location = False
+	# 	for ts in timestamps:
+	# 		curr_entry = self.getLocByTime(ts)
+	# 		curr_lat,curr_lon = curr_entry["latitudeE7"],curr_entry["longitudeE7"]
+	# 		d = self.distance(lat,lon,curr_lat,curr_lon)
+	# 		if not already_at_location and d <= 0.03:
+	# 			num_visits += 1
+	# 			already_at_location = True
+	# 		elif already_at_location and d > 0.03:
+	# 			already_at_location = False
+	# 	return num_visits
 
-	def cluster():
-		pass		
+	def aggeregateTripTime(self, loc):
+		trips = self.getTripsFromLocation(loc)
+		totaltime = datetime.timedelta(seconds=0)
+		for trip in trips:
+			start = trip[0]
+			end = trip[1]
+			totaltime += datetime.timedelta(seconds=(end - start).seconds)
+		return totaltime
 
-	def getNumDistinctVisits(self, lat,lon):
-		num_visits = 0
-		timestamps = self.getTimeStamps()
-		already_at_location = False
-		for ts in timestamps:
-			curr_entry = self.getLocByTime(ts)
-			curr_lat,curr_lon = curr_entry["latitudeE7"],curr_entry["longitudeE7"]
-			d = self.distance(lat,lon,curr_lat,curr_lon)
-			if not already_at_location and d <= 0.03:
-				num_visits += 1
-				already_at_location = True
-			elif already_at_location and d > 0.03:
-				already_at_location = False
-		return num_visits
+	def getTimeSpentAtLocation(self, loc):
+		trips = self.getTripsFromLocation(loc)
+		return self.aggeregateTripTime(trips)
 
 	def getNumVisits(self,msg):
 		address = msg["entities"]["location"][0]["value"]
 		print("Parsed the following location: {}".format(address))
-		geocode_result = self.gmaps.geocode(address)[0]["geometry"]["location"]
-		lat,lon = geocode_result["lat"],geocode_result["lng"]
-		print("Reverse Geocoding identified the following lat and long: {}, {}".format(lat,lon))
-		result = self.getNumDistinctVisits(lat,lon)
+		# geocode_result = self.gmaps.geocode(address)[0]["geometry"]["location"]
+		# lat,lon = geocode_result["lat"],geocode_result["lng"]
+		# print("Reverse Geocoding identified the following lat and long: {}, {}".format(lat,lon))
+		result = len(self.getTripsFromLocation(address))
 		response = "\n\nAccording to Locus, you've visited {} {} times.\n".format(address, result)
 		return response
 
@@ -221,7 +240,25 @@ class Locus:
 		return None
 
 	def getTimeByLoc(self,lat,lon):
-		return self.getNearestLoc((lat,lon)) 
+		return self.getNearestLoc((lat,lon))
+
+	def aggergateTripsByLocation(self, loc):
+		if loc in self.aggergatedTripsByLocation.keys():
+			return self.aggergatedTripsByLocation[loc]
+
+		result = list()
+		for location in self.tripsByLocation.keys():
+			if loc in location:
+				result += self.tripsByLocation[location]
+
+		self.aggergatedTripsByLocation[loc] = result
+		return result
+
+	def getTripsFromLocation(self, loc):
+		if loc in self.tripsByLocation.keys():
+			return self.tripsByLocation[loc]
+		else:
+			return self.aggergateTripsByLocation(loc)
 
 	def getLastVisit(self,msg):
 		print(msg)
@@ -277,3 +314,13 @@ class Locus:
 		lastNight = datetime.datetime(now.year, now.month, now.day-1, 20, 0, 0, 0)
 		raw_entry = self.getLocByTime(lastNight)
 		return "\n\nAccording to Locus, you spent time at {} last night.\n".format(self.coordsToAddressEntry(raw_entry))
+
+
+	def getTopMostVisited(self, num):
+		i = 0
+		for key, value in sorted(self.tripsByLocation.iteritems(), key=lambda (k,v): len(v))[::-1]:
+			print "%s: %s" % (key, len(value))
+			i += 1
+			if i == num:
+				break
+
