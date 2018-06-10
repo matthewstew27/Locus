@@ -32,14 +32,16 @@ class Locus:
 		self.trips = dict()
 		self.tripsByLocation = defaultdict(lambda: list())
 		self.aggergatedTripsByLocation = defaultdict(lambda: list())
-
+		self.countriesVisited = set()
+		self.statesVisited = set()
+		self.citiesVisited = set()
 		with open(path,"r") as f:
 			self.data = json.load(f)["locations"]
 
 		self.process_json()
 		self.calculateTrips()
-		out = self.getTopMostVisited(5)
-		print("====> {}".format(out))
+		self.getTopMostVisited(5)
+		self.getRegionVisits()
 		print("Locus clustered your movements into {} distinct visits".format(len(self.trips)))
 		print("with {} distinct pairs".format(len(set(self.location_indexed_map.keys()))))
 
@@ -276,6 +278,30 @@ class Locus:
 		else:
 			response = "\n\nLocus could not locate any past trips to {}.\n".format(address)
 		return response
+
+	def getRegionVisits(self):
+		for k, v in self.time_indexed_map.iteritems():
+			human_readable_address = v["readable_address"]
+			split = human_readable_address.split(",")
+			
+			country = split[-1].strip()
+			self.countriesVisited.add(country)
+			#don't assume state structure if not USA
+			if country == 'USA':
+				state = split[-2].split(" ")[1]
+				self.statesVisited.add(state)
+			
+			city = split[-3].strip()
+			self.citiesVisited.add(city)
+
+	def getVisitedCountries(self):
+		return self.countriesVisited
+
+	def getVisitedCities(self):
+		return self.citiesVisited
+
+	def getVisitedStates(self):
+		return self.statesVisited
 
 	def toTimestamp(self,month,day,year,hour=12,minute=00):
 		d = date(year, month, day)

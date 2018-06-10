@@ -45,6 +45,21 @@ def getFavs(numFavs):
 	result = locus.getTopMostVisited(numFavs)
 	return jsonify(result)
 
+@app.route('/countries')
+def getCountries():
+	result = list(locus.getVisitedCountries())
+	return jsonify(result)
+
+@app.route('/states')
+def getStates():
+	result = list(locus.getVisitedStates())
+	return jsonify(result)
+
+@app.route('/cities')
+def getCities():
+	result = list(locus.getVisitedCities())
+	return jsonify(result)
+
 
 if __name__ == "__main__":
     app.run()
