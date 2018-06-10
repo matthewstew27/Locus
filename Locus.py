@@ -38,7 +38,8 @@ class Locus:
 
 		self.process_json()
 		self.calculateTrips()
-		self.getTopMostVisited(5)
+		out = self.getTopMostVisited(5)
+		print("====> {}".format(out))
 		print("Locus clustered your movements into {} distinct visits".format(len(self.trips)))
 		print("with {} distinct pairs".format(len(set(self.location_indexed_map.keys()))))
 
@@ -322,11 +323,15 @@ class Locus:
 
 	def getTopMostVisited(self, num):
 		i = 0
+		result = list()
 		for key, value in sorted(self.tripsByLocation.iteritems(), key=lambda (k,v): len(v))[::-1]:
-			print "%s: %s" % (key, len(value))
+			#print "%s: %s" % (key, len(value))
+			hours = self.aggeregateTripTime(key)
+			result.append((key, len(value), hours.total_seconds()//3600))
 			i += 1
 			if i == num:
 				break
+		return result
 
 	def getTimeSpent(self, msg):
 		loc = msg["entities"]["location"][0]["value"]

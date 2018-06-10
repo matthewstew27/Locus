@@ -6,7 +6,7 @@ from wit import Wit
 from Locus import Locus
 import geopy
 import googlemaps
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 
 LOCATION_DATA_PATH = "data/LocationHistory.json"
@@ -39,6 +39,12 @@ def chat(query):
 		intent = resp['entities']['intent']
 		result = locus.processIntent(intent, resp)
 	return 'chatting: {}'.format(result)
+
+@app.route('/favs/<int:numFavs>/')
+def getFavs(numFavs):
+	result = locus.getTopMostVisited(numFavs)
+	return jsonify(result)
+
 
 if __name__ == "__main__":
     app.run()
