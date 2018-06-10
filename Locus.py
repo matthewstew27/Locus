@@ -68,6 +68,7 @@ class Locus:
 		prev = None
 		curr = None
 		total = 0.0
+		i = 0.0
 		for location in self.data:
 			formatted_date = self.parse_datetime(location["timestampMs"])
 			cleaned_location = location.copy()
@@ -75,6 +76,8 @@ class Locus:
 			cleaned_location["longitudeE7"] = location["longitudeE7"]/10000000.0
 			cleaned_location["datetime"] = formatted_date
 			human_readable_address = self.coordsToAddress(cleaned_location["latitudeE7"],cleaned_location["longitudeE7"])
+			print("{} address read =====> {}".format(human_readable_address, i))
+			i += 1
 			cleaned_location["readable_address"] = human_readable_address
 			# Don't add data point if moving
 			if "velocity" not in cleaned_location or cleaned_location["velocity"] == 0:
