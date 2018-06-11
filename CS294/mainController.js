@@ -33,6 +33,10 @@ cs142App.config(['$routeProvider',
                 templateUrl: "components/restaurants/restaurantsTemplate.html",
                 controller: "RestaurantsController"
             }).
+            when("/chat", {
+                templateUrl: "components/chat/chatTemplate.html",
+                controller: "ChatController"
+            }).
             otherwise({
                 redirectTo: '/users'
             });
