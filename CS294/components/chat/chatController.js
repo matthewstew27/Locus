@@ -8,7 +8,7 @@
 cs142App.controller('ChatController', ['$scope', '$routeParams', '$resource', '$mdDialog',
 	function ($scope, $routeParams, $resource, $mdDialog) {
 		var userId = $routeParams.userId;
-		$scope.response='placeholder';
+		$scope.response='';
     $scope.input = '';
 		$scope.main.label = "Favorites View";
 	    var localResource = $resource("http://localhost:3000/favoriteSecond");
@@ -38,6 +38,7 @@ cs142App.controller('ChatController', ['$scope', '$routeParams', '$resource', '$
         success: function (response, statusTExt, XHR) {
           console.log("IN CALLBACK FUNCTION: " + response);
           $scope.response = response;
+
         },
         error: function(response, statusText, XHR) {
           console.log("ERROR!! " + JSON.stringify(response) + JSON.stringify(statusText));
