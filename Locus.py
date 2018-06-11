@@ -10,6 +10,7 @@ from geopy.geocoders import Nominatim
 import googlemaps
 import pickle
 import os.path
+from tqdm import tqdm
 
 class Locus:
 	def __init__(self, path):
@@ -154,7 +155,6 @@ class Locus:
 		# for key in sorted(self.tripsByLocation.keys()):
 		# 	print("{} =========>  {}".format(key, self.tripsByLocation[key]))
 
-
 	# def getNumDistinctVisits(self, lat,lon):
 	# 	num_visits = 0
 	# 	timestamps = self.getTimeStamps()
@@ -208,6 +208,9 @@ class Locus:
 	def getTimeStamps(self):
 		return sorted(self.time_indexed_map.keys())
 
+	def getTimeStampsReverse(self):
+		return sorted(self.time_indexed_map.keys())[::-1]
+
 	def addKeyPoint(self,name,lat,lon):
 		self.KEY_POINTS[name] = [lat,lon]
 
@@ -221,6 +224,7 @@ class Locus:
 		return arr[idx]
 
 	def getLocByTime(self,timestamp):
+		print(timestamp)
 		if timestamp in self.getTimeStamps(): return self.time_indexed_map[timestamp]
 		nearest_timestamp = self.getClosestTimestamp(timestamp)
 		return self.time_indexed_map[nearest_timestamp]
@@ -230,7 +234,7 @@ class Locus:
 		lat, lon = loc[0],loc[1]
 		target_address_readable = self.coordsToAddress(lat,lon)
 		print(target_address_readable)
-		timestamps = self.getTimeStamps()
+		timestamps = self.getTimeStampsReverse()
 		for ts in timestamps:
 			entry = self.time_indexed_map[ts]
 			curr_lat, curr_lon = entry["latitudeE7"],entry["longitudeE7"]
@@ -267,17 +271,20 @@ class Locus:
 			return self.aggergateTripsByLocation(loc)
 
 	def getLastVisit(self,msg):
-		address = msg["entities"]["location"][0]["value"]
-		print("Parsed the following location: {}".format(address))
-		geocode_result = self.gmaps.geocode(address)[0]["geometry"]["location"]
-		lat,lon = geocode_result["lat"],geocode_result["lng"]
-		print("Reverse Geocoding identified the following lat and long: {}, {}".format(lat,lon))
-		result = self.getTimeByLoc(lat,lon)
-		if result:
-			response = "\n\nAccording to Locus, you last visited {} on {}.\n".format(address, result)
-		else:
-			response = "\n\nLocus could not locate any past trips to {}.\n".format(address)
-		return response
+		if "location" in msg["entities"]:
+			address = msg["entities"]["location"][0]["value"]
+			print("Parsed the following location: {}".format(address))
+			geocode_result = self.gmaps.geocode(address)[0]["geometry"]["location"]
+			lat,lon = geocode_result["lat"],geocode_result["lng"]
+			print("Reverse Geocoding identified the following lat and long: {}, {}".format(lat,lon))
+			result = self.getTimeByLoc(lat,lon)
+			if result:
+				response = "\n\nAccording to Locus, you last visited {} on {}.\n".format(address, result)
+			else:
+				response = "\n\nLocus could not locate any past trips to {}.\n".format(address)
+			return response
+		return "We're sorry, Locus could not extract the expected paramaters from your query. Try changing the location format."
+
 
 	def getRegionVisits(self):
 		for k, v in self.time_indexed_map.iteritems():
@@ -331,13 +338,19 @@ class Locus:
 		return "{}".format(result)
 
 	def getLocationGeneric(self,msg):
-		raw_datetime = msg["entities"]["datetime"][0]["value"]
-		formatted_date = parser.parse(raw_datetime).replace(tzinfo=None)
-		closest_date = self.getClosestTimestamp(formatted_date)
-		if closest_date != formatted_date:
-			print("The nearest timestamp we have location data for to {} is {}.".format(formatted_date,closest_date))
-		raw_entry = self.getLocByTime(closest_date)
-		return "According to Locus, on {} you were at {}.".format(closest_date, self.coordsToAddressEntry(raw_entry))
+		if "datetime" in msg["entities"]:
+			raw_datetime = msg["entities"]["datetime"][0]["value"]
+			formatted_date = parser.parse(raw_datetime).replace(tzinfo=None)
+
+			# fix 2019 default bug
+			formatted_date = formatted_date.replace(year=2018) if formatted_date.year == 2019 else formatted_date
+			
+			closest_date = self.getClosestTimestamp(formatted_date)
+			if closest_date != formatted_date:
+				print("The nearest timestamp we have location data for to {} is {}.".format(formatted_date,closest_date))
+			raw_entry = self.getLocByTime(closest_date)
+			return "According to Locus, on {} you were at {}.".format(closest_date, self.coordsToAddressEntry(raw_entry))
+		return "We're sorry, Locus could not extract the expected paramaters from your query. Try changing the date format."
 
 	def aboutLastNight(self):
 		now = datetime.datetime.now()
@@ -345,7 +358,6 @@ class Locus:
 		lastNight = datetime.datetime(now.year, now.month, now.day-1, 20, 0, 0, 0)
 		raw_entry = self.getLocByTime(lastNight)
 		return "\n\nAccording to Locus, you spent time at {} last night.\n".format(self.coordsToAddressEntry(raw_entry))
-
 
 	def getTopMostVisited(self, num):
 		i = 0
@@ -360,8 +372,10 @@ class Locus:
 		return result
 
 	def getTimeSpent(self, msg):
-		loc = msg["entities"]["location"][0]["value"]
-		print(loc)
-		timespent = self.aggeregateTripTime(loc)
-		return "According to Locus, you've spent {} at {}.".format(timespent, loc)
+		if "location" in msg["entities"]:
+			loc = msg["entities"]["location"][0]["value"]
+			print(loc)
+			timespent = self.aggeregateTripTime(loc)
+			return "According to Locus, you've spent {} at {}.".format(timespent, loc)
+		return "We're sorry, Locus could not extract the expected paramaters from your query. Try changing the location format."
 

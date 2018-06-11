@@ -29,19 +29,17 @@ def init():
 
 @app.route('/chat/<string:query>/')
 def chat(query):
-	print(query)
+	query = "" if not query else query
 	result = 'Locus could not locate intent. Please change your wording.'
 	resp = client.message(query)
 	if 'intent' not in resp['entities']:
 		#locus.getNumDistinctVisits(37.4300,-122.1733) #37.4300 N, 122.1733 W
-		return jsonify(result)
+		return result
 	else:
 		intent = resp['entities']['intent']
 		result = locus.processIntent(intent, resp)
-		print("THIS FUNC" + result)
-		print("JSONIFY: ", jsonify(result))
-	return jsonify([result])
-
+		
+	return jsonify(result)
 
 @app.route('/favs/<int:numFavs>/')
 def getFavs(numFavs):
