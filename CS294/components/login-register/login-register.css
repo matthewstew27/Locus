@@ -1,0 +1,16 @@
+body {
+	/*background-image: url(background.jpg);*/
+}
+.registration {
+	display: flex;
+	flex-direction: column;
+}
+
+.input {
+	margin-left: 25px;
+}
+
+#loginButton {
+
+}
+

@@ -1,0 +1,99 @@
+<h1> Cities </h1>
+<!---<div ng-repeat= "y in userFavs">
+
+	<span ng-click="popup($event, y)">
+		<img ng-src="/images/{{y.file_name}}" class="thumbnails">
+	</span>
+
+
+	<md-button ng-click="unfavorite(y._id)" id = "unfavoriteButton">Remove from Favorites</md-button>
+-->
+<a href="https://www.google.com/maps/place/{{cities[0]}}" target="_blank">
+	<div class="card1">
+  		<div class="container">
+    		<h4 class = "cityTitle">{{cities[0]}}</h4>
+    		<p class="clickToView">View Map</p>
+  		</div>
+	</div>
+</a>
+<a href="https://www.google.com/maps/place/{{cities[1]}}" target="_blank">
+	<div class="card2">
+	  <div class="container">
+	    <h4 class = "cityTitle">{{cities[1]}}</h4>
+	    <p class="clickToView">View Map</p>
+	  </div>
+	</div>
+</a>
+
+<a href="https://www.google.com/maps/place/{{cities[2]}}" target="_blank">
+	<div class="card1">
+	  <div class="container">
+	    <h4 class = "cityTitle">{{cities[2]}}</h4>
+	    <p class="clickToView">View Map</p>
+	  </div>
+	</div>
+</a>
+
+<a href="https://www.google.com/maps/place/{{cities[3]}}" target="_blank">
+	<div class="card2">
+	  <div class="container">
+	    <h4 class = "cityTitle">{{cities[3]}}</h4>
+	    <p class="clickToView">View Map</p>
+	  </div>
+	</div>
+</a>
+
+<a href="https://www.google.com/maps/place/{{cities[4]}}" target="_blank">
+	<div class="card1">
+	  <div class="container">
+	    <h4 class = "cityTitle">{{cities[4]}}</h4>
+	    <p class="clickToView">View Map</p>
+	  </div>
+	</div>
+</a>
+
+<a href="https://www.google.com/maps/place/{{cities[5]}}" target="_blank">
+	<div class="card2">
+	  <div class="container">
+	    <h4 class = "cityTitle">{{cities[5]}}</h4>
+	    <p class="clickToView">View Map</p>
+	  </div>
+	</div>
+</a>
+
+</div>
+
+
+
+<!--<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      /* Set the size of the div element that contains the map */
+      #map {
+        height: 400px;  /* The height is 400 pixels */
+        width: 100%;  /* The width is the width of the web page */
+       }
+    </style>
+  </head>
+  <body>
+    <h3>My Google Maps Demo</h3>
+
+    <div id="map"></div>
+    <script>
+// Initialize and add the map
+function initMap() {
+  // The location of Uluru
+  console.log("IN INIT MAP");
+  var uluru = {lat: -25.344, lng: 131.036};
+  // The map, centered at Uluru
+  var map = new google.maps.Map(document.getElementById('map'), {zoom: 4, center: uluru});
+  // The marker, positioned at Uluru
+  var marker = new google.maps.Marker({position: uluru, map: map});
+}
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCmTMnV-6wNW632aSkYkGyWW8Q1LXukuDA&callback=initMap">
+    </script>
+  </body>
+</html> -->

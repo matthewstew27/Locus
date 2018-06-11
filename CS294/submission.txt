@@ -1,0 +1,45 @@
+Project #8 - Submission form
+
+Please fill in this form and submit it with your project #8.
+
+Enter no more than 5 user stories that you did for the assignment that you would like to be
+graded on. For each story include the following information:
+
+Story number and name: 1, Extend user profile detail with usage
+Story points: 3
+Brief description to see the story in action: If you click on a user profile, you will be taken to the detail view. From there you can see the image with the most comments and the most recently added photo. By clicking on them, you will be brought to the photos page.
+
+Story number and name: 6, Photo like votes
+Story points: 4
+Brief description to see the story in action: If you navigate to the photos view, you can click the like button on a photo and see the number of likes increment. you can also unlike. In addition, the photos will be displayed in decreased order by number of likes.
+
+Story number and name: 7, Favorite lists of photos for users
+Story points: 6
+Brief description to see the story in action: If you navigate to the photos view, you can click the favorite button. Then if you click the "view favorited photos" button located on the sidebar, you will be taken to a new page that shows the favorites for whatever user you are logged in as. If you click a photo, it pops up a window showing the photo. If you click the "remove from favorites" button, the photo will be removed from the favorites.
+
+
+Total Story Points: 13
+
+Marketing Video URL (ensure permissions are set to public viewing): https://youtu.be/5XdQ4PZVigM
+
+Is it OK with you if we post your Marketing Video URL on the class discussion forum? yes
+
+Any special instructions for Grading (should be easy to run app from new machine): None
+
+
+************************************ Example *******************
+* As an example for if you did only story 5 your file would look like:
+*
+* Story number and name:  5 - Activity Feed
+* Story points:  4
+* Brief description to see the story in action:
+* Push the button labeled Activity on the toolbar and view the 10 most recent activities of the
+* current user.
+*
+* Total Story Points: 4
+*
+* Marketing Video URL (ensure permissions are set to public viewing): http://www.youtube.com ---
+*
+* Is it OK with you if we post your Marketing Video URL on the class discussion forum? Yes
+*
+* Instructions for Grading (should be easy to run app from new machine): None

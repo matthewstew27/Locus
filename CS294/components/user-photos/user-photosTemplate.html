@@ -1,0 +1,21 @@
+<h1 id="currName">{{main.currUserModel.first_name}} {{main.currUserModel.last_name}}'s Photos</h1>
+<div ng-repeat="y in currUserModel track by $index">
+	<img class="pics" ng-src="/images/{{y.file_name}}">
+	<div layout="row" flex>
+		<md-button class="likeButton" ng-click = "like(y._id, y.file_name)" ng-if="!isLiked(y, $index)">Like</md-button>
+		<md-button class="likeButton" ng-click = "unlike(y._id, y.file_name)" ng-if="isLiked(y, $index)">Unlike</md-button>
+		<md-button class="favoriteButton" ng-click = "favorite(y._id, y.file_name)" ng-if="(!isFavorited(y))">Favorite</md-button>
+		<md-button class="favoriteButton" ng-disabled="true" ng-if="isFavorited(y)">Aleady Favorited</md-button>
+	</div>
+	<div class = "numlikes">{{photoLikes[$index]}} likes</div>
+	<div class = "comment" ng-repeat="x in y.comments">
+		<md-button class="buttons" ng-href = "#!/users/{{x.user._id}}">
+			{{x.user.first_name}} {{x.user.last_name}}:
+		</md-button>
+		<br></br>
+		 {{x.comment}}
+		 <div id="date">{{x.date_time}}</div>
+	</div>
+	<label class="commentButton"><input ng-model="comment"></label>
+	<md-button class="commentButton" ng-click="addComment(y._id, comment)">Post comment</md-button>
+</div>

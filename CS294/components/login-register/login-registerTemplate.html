@@ -1,0 +1,35 @@
+
+<div>
+  <h1 id="loginLabel">Please Login</h1>
+  <div class="login">
+    <!--<label class="login-name" ng-hide="main.loggedIn">Username -->
+        <input type="text" ng-model="main.login_name" placeholder="Username" class = "input"><!--</label>--><br/>
+    <!--<label class="login-name" ng-hide="main.loggedIn">Password -->
+        <input type="password" ng-model="main.password" placeholder="Password" class="input"><!--</label>-->
+    <md-button id="loginButton" ng-click="login()" ng-hide="main.loggedIn">Log In</md-button>
+  </div>
+</div>
+
+  <!--
+  <div class = 'registration'>
+      <label ng-hide="main.loggedIn" >Username<input type="text" id = "usernameInput" ng-model="main.loginNew"></label>
+      </li>
+      <label ng-hide="main.loggedIn">Password<input type="password" id = "passwordInput" ng-model="main.passwordOne"></label>
+      </li>
+      <label ng-hide="main.loggedIn">Retype Password<input type="password" id = "retypePasswordInput" ng-model="main.passwordTwo"></label>
+      </li>
+      <label ng-hide="main.loggedIn">First Name<input type="text" id ="firstnameInput" ng-model="main.first_name"></label>
+      </li>
+      <label ng-hide="main.loggedIn">Last Name<input type="text" id = "lastnameInput" ng-model="main.last_name"></label>
+      </li>
+      <label ng-hide="main.loggedIn">Location<input type="text" id="locationInput" ng-model="main.location"></label>
+      </li>
+      <label ng-hide="main.loggedIn">Description<input type="text" id="descriptionInput" ng-model="main.description"></label>
+      </li>
+      <label ng-hide="main.loggedIn">Occupation<input type="text" id="occupationInput" ng-model="main.occupation"></label>
+      </li>
+      <md-button id="registrationButton" ng-click="register()" ng-hide="main.loggedIn">Register Me</md-button>
+      <p>{{main.registrationMessage}}</p>
+  </div>
+  -->
+</div>

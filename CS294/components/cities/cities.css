@@ -1,0 +1,55 @@
+#currName {
+	size: 150%;
+}
+.buttons {
+	color: black;
+	background: #d7dbf1;
+
+}
+a {
+	text-decoration: none;
+	color: black;
+}
+
+.clickToView {
+	margin-top: 90px;
+	font-size: 35px;
+
+   	font-weight: 200;
+   	color: gray;
+
+}
+
+.clickToViewL {
+	margin-top: -8px;
+	font-size: 35px;
+
+   	font-weight: 200;
+   	color: gray;
+}
+
+.cityTitle {
+	padding-top: 10px;
+	margin-top: -1px;
+	font-size: 40px;
+	font-weight: 100;
+	font-family: Helvetica, sans-serif;
+}
+
+.description {
+	padding-left: 10px;
+}
+
+.thumbnails{
+	height: 150px;
+}
+
+figcaption {
+	display: block;
+}
+
+      /* Set the size of the div element that contains the map */
+#map {
+	height: 400px;  /* The height is 400 pixels */
+	width: 100%;  /* The width is the width of the web page */
+}

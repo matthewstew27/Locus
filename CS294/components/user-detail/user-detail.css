@@ -1,0 +1,20 @@
+#currName {
+	size: 150%;
+}
+.buttons {
+	color: black;
+	background: #d7dbf1;
+
+}
+
+.description {
+	padding-left: 10px;
+}
+
+.thumbnails{
+	height: 150px;
+}
+
+figcaption {
+	display: block;
+}

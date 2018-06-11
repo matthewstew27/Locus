@@ -1,0 +1,13 @@
+<h1 id="currName">{{main.currUserModel.first_name}} {{main.currUserModel.last_name}}</h1>
+<div class ="description" id="location"><b>Location:</b> {{main.currUserModel.location}}</div>
+<div class ="description" id="description"><b>Bio:</b> {{main.currUserModel.description}}</div>
+<div class ="description" id="occupation"><b>Occupation:</b> {{main.currUserModel.occupation}}</div>
+<figure>
+	<a ng-href="#!/photos/{{main.currUserModel._id}}"><img ng-src="/images/{{main.most_commented.file_name}}" class = "thumbnails"></a>
+	<figcaption>{{main.currUserModel.first_name}}'s most commented on photo. {{main.most_commented.comments.length}} comments.</figcaption>
+</figure>
+<figure>
+	<a ng-href="#!/photos/{{main.currUserModel._id}}"><img ng-src="/images/{{main.most_recent.file_name}}" class = "thumbnails"></a>
+	<figcaption>{{main.currUserModel.first_name}}'s most recently added photo. {{main.most_recent.date_time}}.</figcaption>
+</figure>
+<md-button class = "buttons" ng-href="#!/photos/{{main.currUserModel._id}}">{{main.currUserModel.first_name}}'s Photos</md-button>

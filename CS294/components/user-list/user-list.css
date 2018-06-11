@@ -1,0 +1,28 @@
+.buttons {
+	color: black;
+	background: #d7dbf1;
+	margin-left: 23px;
+}
+
+#titleUsers {
+	font-family: Gill Sans, sans-serif
+}
+
+.favSwitch {
+	position: relative;
+	bottom: 50%;
+}
+
+#buttonsChat {
+	margin-top: 40px;
+		color: black;
+	background: #d7dbf1;
+	margin-left: 23px;
+}
+
+
+
+h1 {
+		font-family: Helvetica, sans-serif;
+	font-weight: 100;
+}
