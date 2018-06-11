@@ -90,7 +90,7 @@ class Locus:
 				self.time_indexed_map[formatted_date] = cleaned_location
 				self.location_indexed_map[location] = formatted_date
 				self.readable_indexed_map[location] = human_readable_address
-		
+
 		# Save pickled files
 		with open('data/time_indexed_map.pickle', 'wb') as handle:
 			pickle.dump(self.time_indexed_map, handle)
@@ -98,7 +98,7 @@ class Locus:
 			pickle.dump(self.location_indexed_map, handle2)
 		with open('data/readable_indexed_map.pickle', 'wb') as handle3:
 			pickle.dump(self.readable_indexed_map, handle3)
-		
+
 		print("Locus found {} data points".format(len(self.time_indexed_map.keys())))
 
 	def loadPickledFiles(self,filename):
@@ -153,7 +153,7 @@ class Locus:
 		# 	print("{} =========>  {}".format(key,self.trips[key]))
 		# for key in sorted(self.tripsByLocation.keys()):
 		# 	print("{} =========>  {}".format(key, self.tripsByLocation[key]))
-	
+
 
 	# def getNumDistinctVisits(self, lat,lon):
 	# 	num_visits = 0
@@ -234,7 +234,7 @@ class Locus:
 		for ts in timestamps:
 			entry = self.time_indexed_map[ts]
 			curr_lat, curr_lon = entry["latitudeE7"],entry["longitudeE7"]
-			# if distance is less than 0.03 KM, checks if 
+			# if distance is less than 0.03 KM, checks if
 			# human readable address is same as that being searched for
 			if self.distance(loc[0],loc[1],curr_lat,curr_lon) < 0.03:
 				curr_address_readable = self.coordsToAddress(curr_lat,curr_lon)
@@ -283,14 +283,14 @@ class Locus:
 		for k, v in self.time_indexed_map.iteritems():
 			human_readable_address = v["readable_address"]
 			split = human_readable_address.split(",")
-			
+
 			country = split[-1].strip()
 			self.countriesVisited.add(country)
 			#don't assume state structure if not USA
 			if country == 'USA':
 				state = split[-2].split(" ")[1]
 				self.statesVisited.add(state)
-			
+
 			city = split[-3].strip()
 			self.citiesVisited.add(city)
 
@@ -335,9 +335,9 @@ class Locus:
 		formatted_date = parser.parse(raw_datetime).replace(tzinfo=None)
 		closest_date = self.getClosestTimestamp(formatted_date)
 		if closest_date != formatted_date:
-			print("\nThe nearest timestamp we have location data for to {} is {}.".format(formatted_date,closest_date))
+			print("The nearest timestamp we have location data for to {} is {}.".format(formatted_date,closest_date))
 		raw_entry = self.getLocByTime(closest_date)
-		return "\n\nAccording to Locus, on {} you were at {}.\n".format(closest_date, self.coordsToAddressEntry(raw_entry))
+		return "According to Locus, on {} you were at {}.".format(closest_date, self.coordsToAddressEntry(raw_entry))
 
 	def aboutLastNight(self):
 		now = datetime.datetime.now()
@@ -363,5 +363,5 @@ class Locus:
 		loc = msg["entities"]["location"][0]["value"]
 		print(loc)
 		timespent = self.aggeregateTripTime(loc)
-		return "\n\nAccording to Locus, you've spent {} at {}.\n".format(timespent, loc)
+		return "According to Locus, you've spent {} at {}.".format(timespent, loc)
 

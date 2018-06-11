@@ -34,11 +34,13 @@ def chat(query):
 	resp = client.message(query)
 	if 'intent' not in resp['entities']:
 		#locus.getNumDistinctVisits(37.4300,-122.1733) #37.4300 N, 122.1733 W
-		return result
+		return jsonify(result)
 	else:
 		intent = resp['entities']['intent']
 		result = locus.processIntent(intent, resp)
-	return jsonify(result)
+		print("THIS FUNC" + result)
+		print("JSONIFY: ", jsonify(result))
+	return jsonify([result])
 
 
 @app.route('/favs/<int:numFavs>/')

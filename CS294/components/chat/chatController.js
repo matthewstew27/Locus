@@ -18,15 +18,15 @@ cs142App.controller('ChatController', ['$scope', '$routeParams', '$resource', '$
 	$.ajaxSetup({
 		async: false
 	});
-	$scope.getResponse = function() {
-    $.getJSON('http://127.0.0.1:5000/chat/' + $scope.input,
+	//$scope.getResponse = function() {
+    $.getJSON('http://127.0.0.1:5000/chat/' + "Where was I on tuesday?",
     function(data, textStatus, jqXHR) {
   		$scope.response = data;
   		console.log("DATA: " + JSON.stringify(data));
   		//console.log("DATA: " + data);
     });
 
-  };
+  //};
   console.log("response: " + $scope.response);
 }]);
 
