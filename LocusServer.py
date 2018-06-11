@@ -38,8 +38,8 @@ def chat(query):
 	else:
 		intent = resp['entities']['intent']
 		result = locus.processIntent(intent, resp)
-		print(result);
-	return 'chatting: {}'.format(result)
+	return jsonify(result)
+
 
 @app.route('/favs/<int:numFavs>/')
 def getFavs(numFavs):
